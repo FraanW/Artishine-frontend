@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import API from "../../api"; // 👈 your axios instance
-import "./LoginPage.css"; 
-// --- 2. IMPORT THE ANIMATED BACKGROUND COMPONENT ---
+import AuthServices from "../../services/AuthServices";
+import "./LoginPage.css";
 import AnimatedBackground from '../../components/AnimatedBackground';
 
 const LoginPage = () => {
@@ -27,18 +26,17 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // 👇 call your FastAPI backend
-      const response = await API.post("/users/login", {
+      const response = await AuthServices.login({
         email,
         password,
         role: selectedRole,
       });
 
-      // Expected backend response: { access_token, user_id, role }
-      const { access_token, user_id, role } = response.data;
+      // Expected backend response: { message, user_id, role, token, token_type }
+      const { token, user_id, role } = response.data;
 
       // Store token & user info locally
-      localStorage.setItem("token", access_token);
+      localStorage.setItem("token", token);
       localStorage.setItem("user_id", user_id);
       localStorage.setItem("role", role);
 
@@ -140,7 +138,7 @@ const LoginPage = () => {
                 <select
                   className="px-3 py-2 rounded-lg border border-amber-200 bg-white/50 text-amber-900" // --- NO CHANGE HERE ---
                   value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.g.target.value)}
+                  onChange={(e) => setSelectedRole(e.target.value)}
                 >
                   <option value="buyer">Buyer</option>
                   <option value="artisan">Artisan</option>

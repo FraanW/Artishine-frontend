@@ -1,12 +1,19 @@
 import React from 'react';
 import { Upload, Package, TrendingUp, BarChart3, User, MapPin, Compass, ShoppingCart, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
 const Navigation = ({ userRole }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    // Clear all auth data from localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('role');
+    // Navigate to home page
+    navigate('/');
+  };
 
   const artisanNavItems = [
     { icon: <Upload className="h-5 w-5" />, label: 'Upload', path: '/upload' },
@@ -60,7 +67,7 @@ const Navigation = ({ userRole }) => {
           );
         })}
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="group relative inline-flex items-center md:flex-row flex-col md:px-4 md:py-2 p-3 rounded-full text-muted-foreground hover:text-destructive transition-all duration-300"
         >
           <LogOut className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />

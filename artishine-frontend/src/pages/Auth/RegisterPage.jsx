@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import API from "../../api"; // central axios instance
+import AuthServices from "../../services/AuthServices";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -187,8 +187,7 @@ const RegisterPage = () => {
           phone_number: phoneNumber.trim(),
         };
 
-        // Use central axios instance (API)
-        await API.post("/users/register", payload);
+        await AuthServices.Artisanregister(payload);
 
         toast.success("Artisan registered! Please login.", { position: "top-center", autoClose: 2000 });
         setTimeout(() => navigate("/login"), 1600);
@@ -203,7 +202,7 @@ const RegisterPage = () => {
           longitude: Number(longitude),
         };
 
-        await API.post("/users/register-buyer", payload);
+        await AuthServices.Buyerregister(payload);
 
         toast.success("Buyer registered! Please login.", { position: "top-center", autoClose: 2000 });
         setTimeout(() => navigate("/login"), 1600);

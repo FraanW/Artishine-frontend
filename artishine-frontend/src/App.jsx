@@ -1,10 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { AuthProvider, ProtectedRoute } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import BackgroundScribbles from './components/BackgroundScribbles';
-import BackgroundLottie from './components/BackgroundLottie';
-import { useAuth } from './context/AuthContext';
 import EpicGradientBackground from './components/EpicGradientBackground';
 import CustomCursor from './components/CustomCursor';
 import { ToastContainer } from 'react-toastify';
@@ -25,20 +23,12 @@ import ProfilePageBuyer from './pages/buyer/ProfilePageBuyer';
 import ProfilePageArtisan from './pages/artisan/ProfilePageArtisan';
 
 const AppShell = () => {
-  const { currentUser, role } = useAuth();
-  
-  // Only redirect if explicitly logged in
-  const shouldRedirect = (path) => {
-    if (path === '/login' || path === '/register') {
-      return currentUser ? <Navigate to={role === 'artisan' ? '/upload' : '/explore'} /> : null;
-    }
-    return null;
-  };
+  const token = localStorage.getItem('token');
 
   return (
     <>
       <CustomCursor />
-      {currentUser ? <EpicGradientBackground /> : <BackgroundScribbles />}
+      {token ? <EpicGradientBackground /> : <BackgroundScribbles />}
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
@@ -52,7 +42,7 @@ const AppShell = () => {
           <Route
             path="/upload"
             element={
-              <ProtectedRoute requiredRole="artisan">
+              <ProtectedRoute>
                 <UploadProductPage />
               </ProtectedRoute>
             }
@@ -60,7 +50,7 @@ const AppShell = () => {
           <Route
             path="/manage-products"
             element={
-              <ProtectedRoute requiredRole="artisan">
+              <ProtectedRoute>
                 <ManageProductsPage />
               </ProtectedRoute>
             }
@@ -68,7 +58,7 @@ const AppShell = () => {
           <Route
             path="/orders"
             element={
-              <ProtectedRoute requiredRole="artisan">
+              <ProtectedRoute>
                 <OrdersDashboardPage />
               </ProtectedRoute>
             }
@@ -76,7 +66,7 @@ const AppShell = () => {
           <Route
             path="/analytics"
             element={
-              <ProtectedRoute requiredRole="artisan">
+              <ProtectedRoute>
                 <AnalyticsDashboardPage />
               </ProtectedRoute>
             }
@@ -84,7 +74,7 @@ const AppShell = () => {
           <Route
             path="/profile-artisan"
             element={
-              <ProtectedRoute requiredRole="artisan">
+              <ProtectedRoute>
                 <ProfilePageArtisan />
               </ProtectedRoute>
             }
@@ -94,7 +84,7 @@ const AppShell = () => {
           <Route
             path="/map"
             element={
-              <ProtectedRoute requiredRole="buyer">
+              <ProtectedRoute>
                 <MapPage />
               </ProtectedRoute>
             }
@@ -102,7 +92,7 @@ const AppShell = () => {
           <Route
             path="/explore"
             element={
-              <ProtectedRoute requiredRole="buyer">
+              <ProtectedRoute>
                 <ExplorePage />
               </ProtectedRoute>
             }
@@ -110,7 +100,7 @@ const AppShell = () => {
           <Route
             path="/cart"
             element={
-              <ProtectedRoute requiredRole="buyer">
+              <ProtectedRoute>
                 <CartPage />
               </ProtectedRoute>
             }
@@ -128,7 +118,7 @@ const AppShell = () => {
           <Route
             path="/artisan/profile"
             element={
-              <ProtectedRoute requiredRole="artisan">
+              <ProtectedRoute>
                 <ProfilePageArtisan />
               </ProtectedRoute>
             }
@@ -143,11 +133,7 @@ const AppShell = () => {
 };
 
 const App = () => {
-  return (
-    <AuthProvider>
-      <AppShell />
-    </AuthProvider>
-  );
+  return <AppShell />;
 };
 
 export default App;
