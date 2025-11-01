@@ -71,7 +71,7 @@ const MapPage = () => {
 
   const bounds = coordinates.length > 0 ? getMapBounds(coordinates) : null;
 
-  const GOOGLE_MAPS_API_KEY = "AIzaSyB2H_c1NsBeY5hWM_3t_wudl-nwV78GXO0";
+  const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,

@@ -125,7 +125,7 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
 
   // Vite env vars
-  const GOOGLE_MAPS_API_KEY = "AIzaSyB2H_c1NsBeY5hWM_3t_wudl-nwV78GXO0";
+  const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
   // --- 2. REMOVE THE 'useEffect' THAT SETS 'bg-amber-50' ---
   /*
