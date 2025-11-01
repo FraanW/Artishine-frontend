@@ -2,7 +2,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://api.artishine.in", // Adjust baseURL as needed
+  // baseURL: "http://localhost:8000", // For local development
+  baseURL: "https://api.artishine.in", // live server
   headers: { "Content-Type": "application/json" },
 });
 
