@@ -209,8 +209,35 @@ const RegisterPage = () => {
       }
     } catch (err) {
       console.error(err);
-      const message =
-        err?.response?.data?.detail || err?.response?.data?.message || err.message || "Registration failed";
+
+      let message = "Registration failed";
+
+      // Handle 409 Conflict responses for email already exists
+      if (err?.response?.status === 409) {
+        if (role === "artisan") {
+          // For artisan registration, check the specific error message
+          if (err?.response?.data?.detail?.includes("Email already registered as artisan")) {
+            message = "This email is already registered as an artisan. Please use a different email or try logging in.";
+          } else if (err?.response?.data?.detail?.includes("Email already registered as buyer")) {
+            message = "This email is already registered as a buyer. Please use a different email or try logging in.";
+          } else {
+            message = err?.response?.data?.detail || "Email already registered. Please try logging in or use a different email.";
+          }
+        } else {
+          // For buyer registration, check the specific error message
+          if (err?.response?.data?.detail?.includes("Email already registered as buyer")) {
+            message = "This email is already registered as a buyer. Please use a different email or try logging in.";
+          } else if (err?.response?.data?.detail?.includes("Email already registered as artisan")) {
+            message = "This email is already registered as an artisan. Please use a different email or try logging in.";
+          } else {
+            message = err?.response?.data?.detail || "Email already registered. Please try logging in or use a different email.";
+          }
+        }
+      } else {
+        // Handle other error types
+        message = err?.response?.data?.detail || err?.response?.data?.message || err.message || "Registration failed";
+      }
+
       setError(message);
       toast.error(message, { position: "top-center" });
     } finally {
