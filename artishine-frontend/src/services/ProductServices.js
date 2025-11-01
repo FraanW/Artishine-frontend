@@ -34,6 +34,28 @@ class ProductServices {
       throw error;
     }
   }
+
+  // ───── DELETE ─────
+  async deleteProduct(productId) {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) throw new Error("User ID not found in localStorage");
+
+    await http.delete(`/products/${userId}/products/${productId}`);
+    return { success: true };
+  }
+
+  // ───── PATCH (edit) ─────
+  async updateProduct(productId, updates) {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) throw new Error("User ID not found in localStorage");
+
+    const { data } = await http.patch(
+      `/products/${userId}/products/${productId}`,
+      updates,
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return data;               // updated document
+  }
 }
 
 export default new ProductServices();
