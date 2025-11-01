@@ -1,17 +1,18 @@
+// src/pages/artisan/UploadProductPage.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, Instagram, Mic, MicOff, Upload } from "lucide-react";
+import { Sparkles, Mic, MicOff, Upload, Instagram } from "lucide-react";
 import ImageUploader from "../../components/ImageUploader";
 import PrimaryButton from "../../components/PrimaryButton";
 import Navigation from "../../components/Navigation";
 import CanvasBackground from "../../components/CanvasBackground";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import AuthServices from "../../services/AuthServices";
+import api from "../../api";
 
 const UploadProductPage = () => {
   const navigate = useNavigate();
 
-  // ────── Auth guard ──────
+  // Auth guard
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
@@ -21,56 +22,44 @@ const UploadProductPage = () => {
     }
   }, [navigate]);
 
-  // ────── UI state ──────
   const [step, setStep] = useState(1);
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
-  const [audioBlob, setAudioBlob] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]); // File objects
+  const [audioFile, setAudioFile] = useState(null); // File object
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [generated, setGenerated] = useState(null);
+
+  // NEW: Instagram toggle state (was missing)
   const [postToInstagram, setPostToInstagram] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // ────── Image handling ──────
+  // Image select
   const handleImageSelect = (files) => {
     setImageFiles(files);
-    const urls = files.map((f) => URL.createObjectURL(f));
-    setSelectedImages(urls);
   };
 
-  // ────── MP3 Audio Recording (using MediaRecorder + Opus) ──────
+  // --- MP3 RECORDING (real File object) ---
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const options = { mimeType: "audio/webm;codecs=opus" }; // Best browser support for MP3-like
-      const recorder = new MediaRecorder(stream, options);
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
       mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
       recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
-      recorder.onstop = async () => {
-        const webmBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-
-        // Convert WebM → MP3 using Web Audio API + lamejs (optional)
-        // For simplicity: just send as MP3 (rename + accept webm/opus)
-        // Most backends accept webm/opus. If you *must* have .mp3, use lamejs below.
-
-        // --- OPTION 1: Send as .webm (recommended, smaller, good quality) ---
-        const mp3Blob = new Blob([webmBlob], { type: "audio/mpeg" });
-        const mp3File = new File([mp3Blob], "voice_story.mp3", { type: "audio/mpeg" });
-
-        setAudioBlob(mp3File);
-        stream.getTracks().forEach((t) => t.stop());
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const file = new File([blob], "voice_story.mp3", { type: "audio/mpeg" });
+        setAudioFile(file);
+        stream.getTracks().forEach(t => t.stop());
       };
 
       recorder.start();
       setIsRecording(true);
-      toast.info("Recording... Speak now!");
+      toast.info("Recording...");
     } catch (err) {
-      console.error(err);
       toast.error("Microphone access denied");
     }
   };
@@ -82,298 +71,214 @@ const UploadProductPage = () => {
     }
   };
 
-  // ────── Generate Story (Call Backend) ──────
+  // --- GENERATE STORY (EXACT CURL MATCH) ---
   const generateStory = async () => {
-    if (!imageFiles.length || !audioBlob) {
-      toast.error("Please add images and record audio first");
+    if (imageFiles.length === 0 || !audioFile) {
+      toast.error("Please add image and record audio");
       return;
     }
 
     setIsUploading(true);
     const form = new FormData();
 
-    imageFiles.forEach((f) => form.append("images", f));
-    form.append("voice_file", audioBlob); // ← MP3 file
+    // Append images (exact field name)
+    imageFiles.forEach(file => form.append("images", file));
 
-    const userId = localStorage.getItem("user_id");
-    if (!userId) {
-      toast.error("User ID not found – please login again");
-      setIsUploading(false);
-      return;
-    }
-    form.append("user_id", userId);
-    form.append("postToInstagram", postToInstagram);
+    // Append voice file
+    form.append("voice_file", audioFile);
+
+    // Optionally send instagram flag
+    form.append("post_to_instagram", postToInstagram ? "true" : "false");
 
     try {
-      const { data } = await AuthServices.uploadProduct(form);
+      const { data } = await api.post("/products/create-product", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       setGenerated(data);
       setStep(4);
-      toast.success("Story generated!");
+      toast.success("Product created!");
     } catch (err) {
       console.error(err);
-      const msg =
-        err.response?.data?.detail ||
-        err.message ||
-        "Failed to generate story";
+      const msg = err.response?.data?.detail || "Upload failed";
       toast.error(msg);
     } finally {
       setIsUploading(false);
     }
   };
 
-  // ────── Render ──────
+  // --- RENDER ---
   return (
     <div className="min-h-screen pb-20 pt-20 relative">
-      <CanvasBackground
-        backgroundColor="#f9feffff"
-        elementColors={["#ff620062", "#005cdc5a"]}
-      />
+      <CanvasBackground backgroundColor="#f9feffff" elementColors={["#ff620062", "#005cdc5a"]} />
       <ToastContainer />
 
-      <div className="p-6 relative z-10">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-serif font-bold mb-2 text-amber-900">
-              Share Your Craft
-            </h1>
-            <p className="text-amber-700 font-semibold">
-              Let AI build a beautiful story
-            </p>
-          </div>
+      <div className="p-6 relative z-10 max-w-2xl mx-auto">
+        <h1 className="text-3xl font-serif font-bold text-center mb-8 text-amber-900">
+          Share Your Craft
+        </h1>
 
-          {/* Step indicator */}
-          <div className="flex items-center justify-center mb-8 space-x-4">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                    step >= n
-                      ? "bg-amber-500 text-white"
-                      : "bg-amber-200 text-amber-700"
-                  }`}
-                >
-                  {n}
-                </div>
-                {n < 4 && (
-                  <div
-                    className={`w-16 h-0.5 mx-2 transition-all ${
-                      step > n ? "bg-amber-500" : "bg-amber-200"
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* STEP 1 – Images */}
-          {step === 1 && (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-serif font-bold mb-2 text-amber-900">
-                  Step 1 – Add Photos
-                </h2>
-              </div>
-              <ImageUploader
-                onImageSelect={handleImageSelect}
-                previews={selectedImages}
-              />
-              {imageFiles.length > 0 && (
-                <PrimaryButton
-                  className="mt-6 w-full"
-                  size="lg"
-                  onClick={() => setStep(2)}
-                >
-                  Next
-                </PrimaryButton>
-              )}
-            </div>
-          )}
-
-          {/* STEP 2 – Record Audio (MP3) */}
-          {step === 2 && (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-serif font-bold mb-2 text-amber-900">
-                  Step 2 – Record Your Story
-                </h2>
-                <p className="text-amber-700 font-semibold">
-                  Speak about your craft (MP3 format)
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center space-y-4">
-                <button
-                  onClick={isRecording ? stopRecording : startRecording}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                    isRecording
-                      ? "bg-red-500 text-white"
-                      : "bg-amber-500 text-white hover:bg-amber-600"
-                  }`}
-                >
-                  {isRecording ? (
-                    <>
-                      <MicOff className="h-5 w-5" />
-                      <span>Stop Recording</span>
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="h-5 w-5" />
-                      <span>Start Recording</span>
-                    </>
-                  )}
-                </button>
-
-                {audioBlob && (
-                  <audio
-                    controls
-                    src={URL.createObjectURL(audioBlob)}
-                    className="w-full max-w-xs"
-                  />
-                )}
-              </div>
-
-              <PrimaryButton
-                className="mt-6 w-full"
-                size="lg"
-                onClick={() => setStep(3)}
-                disabled={!audioBlob}
-              >
-                Next – Generate Story
+        {/* STEP 1: Images */}
+        {step === 1 && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-serif font-bold text-amber-900">Step 1: Add Photos</h2>
+            <ImageUploader onImageSelect={handleImageSelect} previews={imageFiles.map(f => URL.createObjectURL(f))} />
+            {imageFiles.length > 0 && (
+              <PrimaryButton onClick={() => setStep(2)} className="w-full" size="lg">
+                Next
               </PrimaryButton>
+            )}
+          </div>
+        )}
+
+        {/* STEP 2: Record Audio */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-serif font-bold text-amber-900">Step 2: Record Story</h2>
+            <div className="flex flex-col items-center space-y-4">
+              <button
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium ${
+                  isRecording ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+                }`}
+              >
+                {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                <span>{isRecording ? "Stop" : "Start"} Recording</span>
+              </button>
+              {audioFile && <audio controls src={URL.createObjectURL(audioFile)} className="w-full max-w-xs" />}
             </div>
-          )}
+            <PrimaryButton
+              onClick={() => setStep(3)}
+              className="w-full"
+              size="lg"
+              disabled={!audioFile}
+            >
+              Next – Generate Story
+            </PrimaryButton>
+          </div>
+        )}
 
-          {/* STEP 3 – Waiting */}
-          {step === 3 && (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-serif font-bold mb-2 text-amber-900">
-                  Step 3 – Building Your Story
-                </h2>
+        {/* STEP 3: Upload */}
+        {step === 3 && (
+          <div className="space-y-6 text-center">
+            <h2 className="text-2xl font-serif font-bold text-amber-900">Step 3: Create Product</h2>
+            {isUploading ? (
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+                <p>Uploading...</p>
               </div>
+            ) : (
+              <PrimaryButton onClick={generateStory} size="lg" icon={<Upload className="h-5 w-5" />}>
+                Create Product
+              </PrimaryButton>
+            )}
+          </div>
+        )}
 
-              <div className="card-warm p-8 text-center bg-amber-50/50 rounded-lg">
-                {isUploading ? (
-                  <div className="space-y-4">
-                    <div className="w-16 h-16 mx-auto rounded-full bg-amber-500/20 flex items-center justify-center">
-                      <Sparkles className="h-8 w-8 text-amber-500 animate-pulse" />
-                    </div>
-                    <h3 className="text-xl font-serif font-bold text-amber-900">
-                      Working magic…
-                    </h3>
+        {step === 4 && generated && (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-serif font-bold mb-2 text-amber-900">
+                Your Story is Ready!
+              </h2>
+              <p className="text-amber-700 font-semibold">Review before publishing</p>
+            </div>
+
+            {/* Product Image Preview */}
+            {generated.image_urls?.length > 0 && (
+              <div className="mb-6">
+                <p className="text-sm font-medium text-amber-900 mb-2">Product Image</p>
+                <img
+                  src={generated.image_urls[0]}
+                  alt={generated.story?.Title}
+                  className="w-full h-80 object-cover rounded-xl shadow-lg"
+                />
+              </div>
+            )}
+
+            {/* Story Fields */}
+            <div className="space-y-5">
+              {[
+                { label: "Title", value: generated.story?.Title },
+                { label: "Tagline", value: generated.story?.Tagline },
+                { label: "Category", value: generated.story?.Category },
+                { label: "For Whom", value: generated.story?.ForWhom },
+                { label: "Material", value: generated.story?.Material },
+                { label: "Method", value: generated.story?.Method },
+                { label: "Cultural Significance", value: generated.story?.CulturalSignificance },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-white/60 backdrop-blur-sm p-4 rounded-lg border border-amber-200">
+                  <p className="text-xs font-medium text-amber-700 uppercase tracking-wider mb-1">
+                    {label}
+                  </p>
+                  <p className="text-amber-900 leading-relaxed">
+                    {value || "—"}
+                  </p>
+                </div>
+              ))}
+
+              {/* Artisan Info */}
+              <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-5 rounded-lg border border-amber-300">
+                <p className="text-sm font-semibold text-amber-800 mb-2">Created By</p>
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-amber-200 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-bold text-amber-800">
+                      {generated.story?.WhoMadeIt?.Name?.[0] || "A"}
+                    </span>
                   </div>
-                ) : (
-                  <PrimaryButton
-                    onClick={generateStory}
-                    size="lg"
-                    icon={<Upload className="h-5 w-5" />}
-                  >
-                    Generate Story
-                  </PrimaryButton>
-                )}
+                  <div>
+                    <p className="font-medium text-amber-900">
+                      {generated.story?.WhoMadeIt?.Name}
+                    </p>
+                    <p className="text-sm text-amber-700">
+                      {generated.story?.WhoMadeIt?.["Shop Name"]} • {generated.story?.WhoMadeIt?.Location}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
 
-          {/* STEP 4 – Review & Publish */}
-  {step === 4 && generated && (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-serif font-bold mb-2 text-amber-900">
-          Step 4 – Review & Publish
-        </h2>
-        <p className="text-amber-700 font-semibold">
-          Your AI-crafted story is ready!
-        </p>
-      </div>
+            {/* Instagram Toggle */}
+            <div className="flex items-center justify-between p-4 bg-white/70 rounded-lg border border-amber-300">
+              <div className="flex items-center space-x-3">
+                <Instagram className="h-6 w-6 text-pink-600" />
+                <div>
+                  <p className="font-medium text-amber-900">Auto-post to Instagram</p>
+                  <p className="text-xs text-amber-700">Share your story instantly</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPostToInstagram(!postToInstagram)}
+                className={`relative w-14 h-7 rounded-full transition-colors ${
+                  postToInstagram ? "bg-pink-500" : "bg-gray-300"
+                }`}
+                aria-pressed={postToInstagram}
+                aria-label="Toggle auto post to Instagram"
+              >
+                <div
+                  className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
+                    postToInstagram ? "translate-x-7" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
 
-      {/* Story Fields */}
-      {[
-        { label: "Title", key: "story.Title" },
-        { label: "Tagline", key: "story.Tagline" },
-        { label: "Category", key: "story.Category" },
-        { label: "For Whom", key: "story.ForWhom" },
-        { label: "Material", key: "story.Material" },
-        { label: "Method", key: "story.Method" },
-        { label: "Cultural Significance", key: "story.CulturalSignificance" },
-      ].map(({ label, key }) => {
-        const value = key.split(".").reduce((o, k) => o?.[k], generated) || "—";
-        return (
-          <div key={key}>
-            <label className="block text-sm font-medium text-amber-900 mb-1">
-              {label}
-            </label>
-            <input
-              type="text"
-              value={value}
-              readOnly
-              className="w-full px-4 py-3 rounded-lg border border-amber-300 bg-white/50 text-amber-900 placeholder-amber-400"
-            />
+            {/* Publish Button */}
+            <PrimaryButton
+              onClick={() => {
+                toast.success("Product published to your shop!");
+                setTimeout(() => navigate("/manage-products"), 1500);
+              }}
+              size="lg"
+              className="w-full text-lg py-4"
+              icon={<Sparkles className="h-6 w-6" />}
+            >
+              Publish Product
+            </PrimaryButton>
           </div>
-        );
-      })}
-
-      {/* Artisan Info */}
-      <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-        <p className="text-sm font-medium text-amber-900 mb-1">Created By</p>
-        <p className="text-amber-800">
-          {generated.artisan_details?.name} • {generated.artisan_details?.shop_name}
-        </p>
-        <p className="text-sm text-amber-700">
-          {generated.artisan_details?.location}
-        </p>
-      </div>
-
-      {/* Image Preview */}
-      {generated.image_urls?.length > 0 && (
-        <div>
-          <p className="text-sm font-medium text-amber-900 mb-2">Product Image</p>
-          <img
-            src={generated.image_urls[0]}
-            alt="Product"
-            className="w-full h-64 object-cover rounded-lg shadow-md"
-          />
-        </div>
-      )}
-
-      {/* Instagram Toggle */}
-      <div className="flex items-center justify-between p-4 border border-amber-300 rounded-lg bg-white/50">
-        <div className="flex items-center space-x-3">
-          <Instagram className="h-6 w-6 text-amber-600" />
-          <div>
-            <p className="font-medium text-amber-900">Auto-post to Instagram</p>
-            <p className="text-sm text-amber-700">Share with your followers</p>
-          </div>
-        </div>
-        <button
-          onClick={() => setPostToInstagram(!postToInstagram)}
-          className={`relative w-12 h-6 rounded-full transition-colors ${
-            postToInstagram ? "bg-amber-500" : "bg-amber-200"
-          }`}
-        >
-          <div
-            className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-              postToInstagram ? "translate-x-7" : "translate-x-1"
-            }`}
-          />
-        </button>
-      </div>
-
-      {/* Publish Button */}
-      <PrimaryButton
-        onClick={() => {
-          toast.success("Product published successfully!");
-          setTimeout(() => navigate("/manage-products"), 1500);
-        }}
-        size="lg"
-        className="w-full"
-      >
-        Publish Product
-      </PrimaryButton>
-    </div>
-  )}
-        </div>
+        )}
       </div>
 
       <Navigation userRole="artisan" />
