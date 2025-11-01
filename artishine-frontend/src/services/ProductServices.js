@@ -14,6 +14,10 @@ class ProductServices {
     return http.get(`/products/${artisanId}/products`);
   }
 
+  getProductById(productId) {
+    return http.get(`/products/${productId}`);
+  }
+
   // ───── New Endpoint: Fetch current user's products ─────
   async getUserProducts() {
     const userId = localStorage.getItem("user_id");
@@ -55,9 +59,6 @@ class ProductServices {
       { headers: { "Content-Type": "application/json" } }
     );
     return data;               // updated document
-  
-    getProductById(productId) {
-    return http.get(`/products/${productId}`);
   }
 }
 
