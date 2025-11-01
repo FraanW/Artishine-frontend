@@ -85,6 +85,6 @@ const ManageProfilePageArtisan = () => {
   );
 };
 
-export default ManageProfile;
+export default ManageProfilePageArtisan;
 
 
