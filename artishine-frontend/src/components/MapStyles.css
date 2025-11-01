@@ -660,12 +660,198 @@
   margin: 0;
 }
 
+/* Contact Modal */
+.contact-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+.contact-modal {
+  position: fixed;
+  top: 20%;
+  left: 39%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1001;
+  margin: auto;
+}
+
+.contact-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.contact-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0;
+}
+
+.contact-modal-close-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.contact-modal-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.contact-modal-close-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.contact-modal-content {
+  padding: 24px;
+}
+
+.contact-shop-info {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.contact-shop-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 4px;
+}
+
+.contact-shop-icon {
+  width: 20px;
+  height: 20px;
+  color: #d97706;
+}
+
+.contact-artisan-name {
+  font-size: 14px;
+  color: #a16207;
+  font-weight: 500;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.contact-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #fef7ed;
+  border-radius: 8px;
+  border: 1px solid #fed7aa;
+}
+
+.contact-detail-icon {
+  width: 18px;
+  height: 18px;
+  color: #d97706;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.contact-detail-content {
+  flex: 1;
+}
+
+.contact-detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.contact-detail-value {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.contact-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.contact-call-btn {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+}
+
+.contact-call-btn:hover {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+}
+
+.contact-email-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.contact-email-btn:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.contact-action-icon {
+  width: 16px;
+  height: 16px;
+}
+
 /* Artisan Detail View */
 .artisan-detail-view {
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .artisan-detail-header {
@@ -735,6 +921,7 @@
   flex: 1;
   padding: 16px;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .artisan-detail-products-title {
@@ -822,6 +1009,37 @@
   width: 14px;
   height: 14px;
   color: #d97706;
+}
+
+/* Product Reach Out Button */
+.artisan-product-reach-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  margin-top: 12px;
+}
+
+.artisan-product-reach-btn:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.artisan-product-reach-icon {
+  width: 16px;
+  height: 16px;
 }
 
 

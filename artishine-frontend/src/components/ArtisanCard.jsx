@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, ChevronLeft, ChevronRight, Rocket } from 'lucide-react';
 import './MapStyles.css';
 
-const ArtisanCard = ({ artisan, onLocateOnMap, onArtisanClick, isSelected }) => {
+const ArtisanCard = ({ artisan, onLocateOnMap, onArtisanClick, onReachOut, isSelected }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleLocateClick = () => {
@@ -94,20 +94,28 @@ const ArtisanCard = ({ artisan, onLocateOnMap, onArtisanClick, isSelected }) => 
         </div>
 
         <div className="artisan-card-buttons">
-          <button
-            onClick={handleLocateClick}
-            className="artisan-card-reach-btn"
-          >
-            <Rocket className="artisan-card-reach-icon" />
-            Reach out
-          </button>
-          <button
-            onClick={handleLocateClick}
-            className="artisan-card-locate-btn"
-          >
-            <MapPin className="artisan-card-locate-icon" />
-            Locate on Map
-          </button>
+          <div className="artisan-card-buttons">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onReachOut) onReachOut(artisan);
+              }}
+              className="artisan-card-reach-btn"
+            >
+              <Rocket className="artisan-card-reach-icon" />
+              Reach out
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLocateClick();
+              }}
+              className="artisan-card-locate-btn"
+            >
+              <MapPin className="artisan-card-locate-icon" />
+              Locate on Map
+            </button>
+          </div>
         </div>
       </div>
     </div>

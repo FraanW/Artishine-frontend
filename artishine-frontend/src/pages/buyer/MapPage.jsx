@@ -6,6 +6,7 @@ import Navigation from '../../components/Navigation';
 import ArtisanTooltip from '../../components/ArtisanTooltip';
 import ArtisanCard from '../../components/ArtisanCard';
 import ArtisanDetailView from '../../components/ArtisanDetailView';
+import ContactModal from '../../components/ContactModal';
 import LoadingScreen from '../../components/LoadingScreen';
 import ProductServices from '../../services/ProductServices';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
@@ -17,6 +18,7 @@ import CanvasBackground from '../../components/CanvasBackground';
 const MapPage = () => {
   const [selectedArtisan, setSelectedArtisan] = useState(null);
   const [selectedArtisanForDetail, setSelectedArtisanForDetail] = useState(null);
+  const [contactModalArtisan, setContactModalArtisan] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -129,6 +131,14 @@ const MapPage = () => {
     setSelectedArtisanForDetail(null);
   };
 
+  const handleReachOut = (artisan) => {
+    setContactModalArtisan(artisan);
+  };
+
+  const handleCloseContactModal = () => {
+    setContactModalArtisan(null);
+  };
+
   return (
     <div className="min-h-screen pb-20 pt-20 relative">
       {/* Canvas Background */}
@@ -221,6 +231,7 @@ const MapPage = () => {
                 <ArtisanDetailView
                   artisan={selectedArtisanForDetail}
                   onBack={handleBackToShops}
+                  onReachOut={handleReachOut}
                 />
               </motion.div>
             ) : (
@@ -247,6 +258,7 @@ const MapPage = () => {
                         artisan={artisan}
                         onLocateOnMap={handleLocateOnMap}
                         onArtisanClick={handleArtisanClick}
+                        onReachOut={handleReachOut}
                         isSelected={selectedArtisan?.id === artisan.id}
                       />
                     ))}
@@ -259,7 +271,7 @@ const MapPage = () => {
       </div>
 
       {/* Loading Screen */}
-      {loading && <LoadingScreen text="Loading artisans..." />}
+      {loading && <LoadingScreen text="Fetching artisans around you..." />}
 
       {error && (
         <div className="absolute top-20 left-6 right-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-20">
@@ -268,6 +280,13 @@ const MapPage = () => {
       )}
 
       <Navigation userRole="buyer" />
+
+      {/* Contact Modal */}
+      <ContactModal
+        artisan={contactModalArtisan}
+        isOpen={!!contactModalArtisan}
+        onClose={handleCloseContactModal}
+      />
     </div>
   );
 };
