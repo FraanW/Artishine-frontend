@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://34.72.64.75", // Adjust baseURL as needed
+  baseURL: "https://api.artishine.in", // Adjust baseURL as needed
   headers: { "Content-Type": "application/json" },
 });
 
