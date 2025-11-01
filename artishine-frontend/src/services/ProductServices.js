@@ -12,6 +12,10 @@ class ProductServices {
   getArtisanProducts(artisanId) {
     return http.get(`/products/${artisanId}/products`);
   }
+
+  getProductById(productId) {
+    return http.get(`/products/${productId}`);
+  }
 }
 
 export default new ProductServices();

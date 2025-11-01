@@ -28,7 +28,7 @@ const ArtisanDetailView = ({ artisan, onBack, onReachOut }) => {
   }, [artisan?.id]);
 
   return (
-    <div className="artisan-detail-view">
+    <div className="artisan-detail-view overflow-y-auto">
       {/* Header */}
       <div className="artisan-detail-header">
         <button

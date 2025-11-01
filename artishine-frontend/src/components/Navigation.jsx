@@ -1,5 +1,5 @@
 import React from 'react';
-import { Upload, Package, TrendingUp, BarChart3, User, MapPin, Compass, ShoppingCart, LogOut } from 'lucide-react';
+import { Upload, Package, TrendingUp, BarChart3, User, MapPin, Compass, ShoppingCart, LogOut, Heart } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const Navigation = ({ userRole }) => {
@@ -26,7 +26,7 @@ const Navigation = ({ userRole }) => {
   const buyerNavItems = [
     { icon: <MapPin className="h-5 w-5" />, label: 'Map', path: '/map' },
     { icon: <Compass className="h-5 w-5" />, label: 'Explore', path: '/explore' },
-    { icon: <ShoppingCart className="h-5 w-5" />, label: 'Cart', path: '/cart' },
+    { icon: <Heart className="h-5 w-5" />, label: 'Wishlist', path: '/cart' },
     { icon: <User className="h-5 w-5" />, label: 'Profile', path: '/profile' },
   ];
 
