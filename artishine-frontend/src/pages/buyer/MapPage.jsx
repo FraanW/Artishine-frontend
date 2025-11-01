@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Search, X, MessageCircle } from 'lucide-react';
+import { MapPin, Search, X, MessageCircle, Menu, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PrimaryButton from '../../components/PrimaryButton';
 import Navigation from '../../components/Navigation';
 import ArtisanTooltip from '../../components/ArtisanTooltip';
 import ArtisanCard from '../../components/ArtisanCard';
 import ArtisanDetailView from '../../components/ArtisanDetailView';
+import ContactModal from '../../components/ContactModal';
 import LoadingScreen from '../../components/LoadingScreen';
 import ProductServices from '../../services/ProductServices';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
@@ -17,9 +18,12 @@ import CanvasBackground from '../../components/CanvasBackground';
 const MapPage = () => {
   const [selectedArtisan, setSelectedArtisan] = useState(null);
   const [selectedArtisanForDetail, setSelectedArtisanForDetail] = useState(null);
+  const [contactModalArtisan, setContactModalArtisan] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(window.innerWidth < 1024); // Start open on mobile only
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const mapRef = useRef(null);
 
   // Use the artisans data directly from the API
@@ -113,12 +117,28 @@ const MapPage = () => {
 
   const handleLocateOnMap = (artisan) => {
     setSelectedArtisan(artisan);
+    // Close mobile menu when locating on map
+    if (!isDesktop) {
+      setIsMobileMenuOpen(false);
+    }
 
     // Pan to the artisan's location and zoom in
     if (mapRef.current && artisan.coordinates) {
       mapRef.current.panTo(artisan.coordinates);
       mapRef.current.setZoom(15);
     }
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleMapClick = () => {
+    // Close mobile menu when clicking on map
+    if (!isDesktop) {
+      setIsMobileMenuOpen(false);
+    }
+    setSelectedArtisan(null);
   };
 
   const handleArtisanClick = (artisan) => {
@@ -129,6 +149,14 @@ const MapPage = () => {
     setSelectedArtisanForDetail(null);
   };
 
+  const handleReachOut = (artisan) => {
+    setContactModalArtisan(artisan);
+  };
+
+  const handleCloseContactModal = () => {
+    setContactModalArtisan(null);
+  };
+
   return (
     <div className="min-h-screen pb-20 pt-20 relative">
       {/* Canvas Background */}
@@ -136,6 +164,16 @@ const MapPage = () => {
         backgroundColor="#f9feffff"
         elementColors={['#ff620062', '#005cdc5a']}
       />
+
+      {/* Mobile Hamburger Button */}
+      {!isDesktop && (
+        <button
+          onClick={toggleMobileMenu}
+          className="fixed top-24 right-4 z-50 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg border border-amber-200"
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6 text-amber-700" /> : <Menu className="h-6 w-6 text-amber-700" />}
+        </button>
+      )}
 
       {/* Two Column Layout */}
       <div className="relative h-screen z-10 flex">
@@ -206,60 +244,137 @@ const MapPage = () => {
           )}
         </div>
 
-        {/* Sidebar Column */}
-        <div className="w-80 bg-white shadow-lg border-l border-gray-200 flex flex-col">
-          <AnimatePresence mode="wait">
-            {selectedArtisanForDetail ? (
-              <motion.div
-                key="detail-view"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="flex-1"
-              >
-                <ArtisanDetailView
-                  artisan={selectedArtisanForDetail}
-                  onBack={handleBackToShops}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="shops-list"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col h-full"
-              >
-                {/* Sidebar Header */}
-                <div className="p-4 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-amber-900">Shops around you</h2>
-                  <p className="text-sm text-amber-700 mt-1">Discover local artisans</p>
-                </div>
-
-                {/* Cards Container */}
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div className="space-y-6">
-                    {artisans.map((artisan) => (
-                      <ArtisanCard
-                        key={artisan.id}
-                        artisan={artisan}
-                        onLocateOnMap={handleLocateOnMap}
-                        onArtisanClick={handleArtisanClick}
-                        isSelected={selectedArtisan?.id === artisan.id}
-                      />
-                    ))}
+        {/* Sidebar Column - Desktop Only */}
+        {isDesktop && (
+          <div className="w-80 bg-white shadow-lg border-l border-gray-200 flex flex-col overflow-y-auto">
+            <AnimatePresence mode="wait">
+              {selectedArtisanForDetail ? (
+                <motion.div
+                  key="detail-view"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex-1"
+                >
+                  <ArtisanDetailView
+                    artisan={selectedArtisanForDetail}
+                    onBack={handleBackToShops}
+                    onReachOut={handleReachOut}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="shops-list"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col h-full"
+                >
+                  {/* Sidebar Header */}
+                  <div className="p-4 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-amber-900">Shops around you</h2>
+                    <p className="text-sm text-amber-700 mt-1">Discover local artisans</p>
                   </div>
-                </div>
+
+                  {/* Cards Container */}
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <div className="space-y-6">
+                      {artisans.map((artisan) => (
+                        <ArtisanCard
+                          key={artisan.id}
+                          artisan={artisan}
+                          onLocateOnMap={handleLocateOnMap}
+                          onArtisanClick={handleArtisanClick}
+                          onReachOut={handleReachOut}
+                          isSelected={selectedArtisan?.id === artisan.id}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* Mobile Sidebar Overlay */}
+        {!isDesktop && (
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'tween', duration: 0.3 }}
+                className="fixed top-0 right-0 h-full w-3/4 bg-white shadow-2xl border-l border-gray-200 z-40 flex flex-col"
+              >
+                <AnimatePresence mode="wait">
+                  {selectedArtisanForDetail ? (
+                    <motion.div
+                      key="detail-view"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex-1"
+                    >
+                      <ArtisanDetailView
+                        artisan={selectedArtisanForDetail}
+                        onBack={handleBackToShops}
+                        onReachOut={handleReachOut}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="shops-list"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex flex-col h-full"
+                    >
+                      {/* Mobile Sidebar Header */}
+                      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                        <div>
+                          <h2 className="text-xl font-bold text-amber-900">Shops around you</h2>
+                          <p className="text-sm text-amber-700 mt-1">Discover local artisans</p>
+                        </div>
+                        <button
+                          onClick={toggleMobileMenu}
+                          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                          <X className="h-6 w-6 text-amber-700" />
+                        </button>
+                      </div>
+
+                      {/* Cards Container */}
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <div className="space-y-6">
+                          {artisans.map((artisan) => (
+                            <ArtisanCard
+                              key={artisan.id}
+                              artisan={artisan}
+                              onLocateOnMap={handleLocateOnMap}
+                              onArtisanClick={handleArtisanClick}
+                              onReachOut={handleReachOut}
+                              isSelected={selectedArtisan?.id === artisan.id}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        )}
       </div>
 
       {/* Loading Screen */}
-      {loading && <LoadingScreen text="Loading artisans..." />}
+      {loading && <LoadingScreen text="Fetching artisans around you..." />}
 
       {error && (
         <div className="absolute top-20 left-6 right-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-20">
@@ -268,6 +383,13 @@ const MapPage = () => {
       )}
 
       <Navigation userRole="buyer" />
+
+      {/* Contact Modal */}
+      <ContactModal
+        artisan={contactModalArtisan}
+        isOpen={!!contactModalArtisan}
+        onClose={handleCloseContactModal}
+      />
     </div>
   );
 };

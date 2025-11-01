@@ -55,6 +55,9 @@ class ProductServices {
       { headers: { "Content-Type": "application/json" } }
     );
     return data;               // updated document
+  
+    getProductById(productId) {
+    return http.get(`/products/${productId}`);
   }
 }
 

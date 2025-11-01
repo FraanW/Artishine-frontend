@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, MapPin, Package, Palette } from 'lucide-react';
+import { ArrowLeft, MapPin, Package, Palette, MessageCircle } from 'lucide-react';
 import ProductServices from '../services/ProductServices';
 import './MapStyles.css';
 
-const ArtisanDetailView = ({ artisan, onBack }) => {
+const ArtisanDetailView = ({ artisan, onBack, onReachOut }) => {
   const [artisanProducts, setArtisanProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,7 +28,7 @@ const ArtisanDetailView = ({ artisan, onBack }) => {
   }, [artisan?.id]);
 
   return (
-    <div className="artisan-detail-view">
+    <div className="artisan-detail-view overflow-y-auto">
       {/* Header */}
       <div className="artisan-detail-header">
         <button
@@ -100,6 +100,15 @@ const ArtisanDetailView = ({ artisan, onBack }) => {
                       <span>{product.story?.Material || 'N/A'}</span>
                     </div>
                   </div>
+
+                  {/* Reach Out Button */}
+                  <button
+                    onClick={() => onReachOut && onReachOut(artisan)}
+                    className="artisan-product-reach-btn"
+                  >
+                    <MessageCircle className="artisan-product-reach-icon" />
+                    Reach out to Artisan
+                  </button>
                 </div>
               </div>
             ))}
