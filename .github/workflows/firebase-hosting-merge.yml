@@ -16,7 +16,7 @@ jobs:
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
       - name: Install dependencies
         working-directory: artishine-frontend
@@ -24,18 +24,15 @@ jobs:
 
       - name: Build
         working-directory: artishine-frontend
-        run: npm run build
         env:
-          # This line injects the GitHub Secret into the build environment
-          # Make sure the name on the LEFT matches your secret name from Step 1
-          VITE_GOOGLE_MAPS_API_KEY: '${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}'
-          VITE_FIREBASE_API_KEY: '${{ secrets.VITE_FIREBASE_API_KEY }}'
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+        run: npm run build
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ARTISAN_AI_BACKEND }}'
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ARTISAN_AI_BACKEND }}
           channelId: live
           projectId: artisan-ai-backend
-
