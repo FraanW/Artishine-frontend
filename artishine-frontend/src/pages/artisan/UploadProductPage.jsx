@@ -28,9 +28,11 @@ const UploadProductPage = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [generated, setGenerated] = useState(null);
-
-  // NEW: Instagram toggle state (was missing)
   const [postToInstagram, setPostToInstagram] = useState(false);
+
+  // --- ADDED ---
+  // New state to manage the final publish button's loading
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -87,8 +89,10 @@ const UploadProductPage = () => {
     // Append voice file
     form.append("voice_file", audioFile);
 
-    // Optionally send instagram flag
-    form.append("post_to_instagram", postToInstagram ? "true" : "false");
+    // --- MODIFIED ---
+    // We hardcode 'false' here because this step ONLY creates the product.
+    // The user decides to post in the *next* step.
+    form.append("post_to_instagram", "false");
 
     try {
       const { data } = await api.post("/products/create-product", form, {
@@ -265,17 +269,43 @@ const UploadProductPage = () => {
               </button>
             </div>
 
-            {/* Publish Button */}
+            {/* --- MODIFIED: Publish Button --- */}
             <PrimaryButton
-              onClick={() => {
-                toast.success("Product published to your shop!");
-                setTimeout(() => navigate("/manage-products"), 1500);
+              onClick={async () => {
+                setIsPublishing(true); // Start loading
+                
+                try {
+                  if (postToInstagram) {
+                    toast.info("Posting to Instagram...");
+                    // Call the new endpoint
+                    await api.post(
+                      `/products/${generated.user_id}/${generated.product_id}/post-to-instagram`
+                    );
+                    toast.success("Product published and posted to Instagram!");
+                  } else {
+                    toast.success("Product published to your shop!");
+                  }
+
+                  // Navigate away on success
+                  setTimeout(() => navigate("/manage-products"), 1500);
+
+                } catch (err) {
+                  console.error(err);
+                  const msg = err.response?.data?.detail || "Post failed";
+                  toast.error(msg);
+                  setIsPublishing(false); // Stop loading on error
+                }
               }}
               size="lg"
               className="w-full text-lg py-4"
-              icon={<Sparkles className="h-6 w-6" />}
+              icon={isPublishing ? (
+                <div className="w-6 h-6 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <Sparkles className="h-6 w-6" />
+              )}
+              disabled={isPublishing}
             >
-              Publish Product
+              {isPublishing ? "Publishing..." : "Publish Product"}
             </PrimaryButton>
           </div>
         )}
