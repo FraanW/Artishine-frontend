@@ -36,9 +36,11 @@ const MapPage = () => {
         id: artisan.user_id,
         name: artisan.name || 'Unknown Artisan',
         shopName: artisan.shop_name || 'Unknown Shop',
-        location: artisan.place || 'Unknown Location',
+        place: artisan.place || 'Unknown Location',
         latitude: artisan.latitude,
         longitude: artisan.longitude,
+        email: artisan.email || null,
+        phone_number: artisan.phone_number || null,
         images: artisan.product_images || [],
         coordinates: {
           lat: artisan.latitude,

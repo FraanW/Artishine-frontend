@@ -14,7 +14,7 @@ const ContactModal = ({ artisan, isOpen, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="contact-modal-backdrop"
+            className="contact-modal-backdrop z-[9998]"
             onClick={onClose}
           />
 
@@ -24,7 +24,7 @@ const ContactModal = ({ artisan, isOpen, onClose }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="contact-modal"
+            className="contact-modal z-[9999]"
           >
             {/* Header */}
             <div className="contact-modal-header">

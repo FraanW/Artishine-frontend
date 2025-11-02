@@ -63,7 +63,7 @@ const CustomCursor = () => {
   }, []);
 
   return (
-    <div ref={cursorRef} className="fixed top-0 left-0 w-full h-full pointer-events-none z-50">
+    <div ref={cursorRef} className="fixed top-0 left-0 w-full h-full pointer-events-none z-[10000]">
       <div
         ref={cursorDotRef}
         className="w-3 h-3 bg-amber-600 rounded-full fixed -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-150 ease-out"

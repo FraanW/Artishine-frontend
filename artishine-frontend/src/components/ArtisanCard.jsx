@@ -90,7 +90,7 @@ const ArtisanCard = ({ artisan, onLocateOnMap, onArtisanClick, onReachOut, isSel
         <p className="artisan-card-artisan-name">by {artisan.name}</p>
         <div className="artisan-card-location">
           <MapPin className="artisan-card-location-icon" />
-          <span>{artisan.location}</span>
+          <span>{artisan.place || artisan.location}</span>
         </div>
 
         <div className="artisan-card-buttons">
