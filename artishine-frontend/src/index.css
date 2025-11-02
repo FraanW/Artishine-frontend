@@ -174,6 +174,13 @@ Warm, earthy, authentic, premium aesthetic.
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--terracotta-dark));
   }
+
+  /* Thicker scrollbar for mobile devices */
+  @media (max-width: 1023px) {
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 20px;
+    }
+  }
 }
 
 @layer components {
