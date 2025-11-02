@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, RecaptchaVerifier } from 'firebase/auth';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyALhVk7lqJqpxDHrrpZGSzGAned_BIiypE",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: "artisan-ai-backend.firebaseapp.com",
     projectId: "artisan-ai-backend",
     storageBucket: "artisan-ai-backend.firebasestorage.app",

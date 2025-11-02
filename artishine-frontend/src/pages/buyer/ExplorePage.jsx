@@ -181,6 +181,8 @@ const ExplorePage = () => {
           location: product.artisan_details?.location || 'Unknown Location',
           latitude: product.artisan_details?.latitude,
           longitude: product.artisan_details?.longitude,
+          email: product.artisan_details?.email || null,
+          phone: product.artisan_details?.phone_number || null,
           images: product.image_urls || ['/images/fallback.jpg'],
           story: product.story || {},
           timestamp: product.timestamp,

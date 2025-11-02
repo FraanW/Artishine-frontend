@@ -3,6 +3,7 @@ import { Trash2, ShoppingCart, MessageCircle } from 'lucide-react';
 import PrimaryButton from '../../components/PrimaryButton';
 import Navigation from '../../components/Navigation';
 import ContactModal from '../../components/ContactModal';
+import LoadingScreen from '../../components/LoadingScreen';
 import WishlistServices from '../../services/WishlistServices';
 import ProductServices from '../../services/ProductServices';
 import { toast } from 'react-toastify';
@@ -101,8 +102,8 @@ const WishlistPage = () => {
       name: product.artisan_details?.name || 'Unknown Artisan',
       shop_name: product.artisan_details?.shop_name || 'Unknown Shop',
       place: product.artisan_details?.location || 'Unknown Location',
-      email: null,
-      phone_number: null
+      email: product.artisan_details?.email || null,
+      phone_number: product.artisan_details?.phone_number || null
     };
     setContactModalArtisan(artisan);
   };
@@ -121,6 +122,9 @@ const WishlistPage = () => {
         elementColors={['#ff620062', '#005cdc5a']}
       />
 
+      {/* Loading Screen */}
+      {loading && <LoadingScreen text="Loading your wishlist..." />}
+
       {/* --- 4. ADD 'relative z-10' TO YOUR CONTENT WRAPPER --- */}
       <div className="p-6 relative z-10">
         <div className="max-w-2xl mx-auto">
@@ -130,11 +134,7 @@ const WishlistPage = () => {
             <p className="text-amber-700 font-semibold">{wishlistItems.length} item{wishlistItems.length !== 1 ? 's' : ''} saved</p>
           </div>
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="text-amber-900">Loading your wishlist...</div>
-            </div>
-          ) : wishlistItems.length > 0 ? (
+          {wishlistItems.length > 0 ? (
             <div className="space-y-6">
               <div className="space-y-4">
                 {wishlistItems.map((item) => (

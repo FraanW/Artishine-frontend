@@ -327,8 +327,8 @@ const ManageProductsPage = () => {
 
       {/* ────── MODAL ────── */}
       {selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white/90 backdrop-blur-md rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9998] overflow-y-auto">
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 relative z-[9999]">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-2xl font-serif font-bold text-amber-900">

@@ -147,14 +147,14 @@ const RegisterPage = () => {
     if (password !== confirmPassword) return "Passwords do not match";
     if (!place.trim()) return "Please enter your place (city, region)";
     if (latitude === null || longitude === null) return "Please pick a location on the map";
+    if (!phoneNumber.trim()) return "Please enter phone number";
+    if (!/^\+?[0-9]{7,15}$/.test(phoneNumber.trim()))
+      return "Please enter a valid phone number (digits, 7-15 chars, optional +)";
     if (role === "artisan") {
       if (!language.trim()) return "Please select a language";
       if (!dateOfBirthInput) return "Please pick date of birth";
       if (!shopName.trim()) return "Please enter shop name";
       if (!shopType.trim()) return "Please enter shop type";
-      if (!phoneNumber.trim()) return "Please enter phone number";
-      if (!/^\+?[0-9]{7,15}$/.test(phoneNumber.trim()))
-        return "Please enter a valid phone number (digits, 7-15 chars, optional +)";
     }
     return null;
   };
@@ -200,6 +200,7 @@ const RegisterPage = () => {
           place: place.trim(),
           latitude: Number(latitude),
           longitude: Number(longitude),
+          phone_number: phoneNumber.trim(),
         };
 
         await AuthServices.Buyerregister(payload);
@@ -322,6 +323,11 @@ const RegisterPage = () => {
                 <p className="text-xs text-amber-700 mt-2">Marker sets the shop location (lat/lng).</p>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-1">Phone number</label>
+                <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-amber-200 bg-white/50" placeholder="+9198xxxxxxxx" required />
+              </div>
+
               {role === "artisan" && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -335,25 +341,19 @@ const RegisterPage = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-amber-800 mb-1">Phone number</label>
-                      <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-amber-200 bg-white/50" placeholder="+9198xxxxxxxx" required />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-amber-800 mb-1">Language (BCP-47)</label>
-                      <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-amber-200 bg-white/50">
-                        <option value="en-US">English (en-US)</option>
-                        <option value="hi-IN">Hindi (hi-IN)</option>
-                        <option value="bn-IN">Bengali (bn-IN)</option>
-                        <option value="ta-IN">Tamil (ta-IN)</option>
-                        <option value="te-IN">Telugu (te-IN)</option>
-                        <option value="ml-IN">Malayalam (ml-IN)</option>
-                        <option value="gu-IN">Gujarati (gu-IN)</option>
-                        <option value="kn-IN">Kannada (kn-IN)</option>
-                        <option value="pa-IN">Punjabi (pa-IN)</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-amber-800 mb-1">Language (BCP-47)</label>
+                    <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-amber-200 bg-white/50">
+                      <option value="en-US">English (en-US)</option>
+                      <option value="hi-IN">Hindi (hi-IN)</option>
+                      <option value="bn-IN">Bengali (bn-IN)</option>
+                      <option value="ta-IN">Tamil (ta-IN)</option>
+                      <option value="te-IN">Telugu (te-IN)</option>
+                      <option value="ml-IN">Malayalam (ml-IN)</option>
+                      <option value="gu-IN">Gujarati (gu-IN)</option>
+                      <option value="kn-IN">Kannada (kn-IN)</option>
+                      <option value="pa-IN">Punjabi (pa-IN)</option>
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
