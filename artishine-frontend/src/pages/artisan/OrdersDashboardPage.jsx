@@ -1,29 +1,15 @@
 
-import React, { useState } from 'react';
-import sampleData from '../../data/sampleData';
-import OrderCard from '../../components/OrderCard';
+import React from 'react';
 import Navigation from '../../components/Navigation';
-import { Package } from 'lucide-react';
+import { Clock, Sparkles } from 'lucide-react';
 
 // --- 1. IMPORT THE CANVAS BACKGROUND ---
 import CanvasBackground from '../../components/CanvasBackground';
 
 const OrdersDashboardPage = () => {
-  const [activeTab, setActiveTab] = useState('new');
-  const [orders, setOrders] = useState(sampleData.orders);
-
-  const tabs = [
-    { id: 'new', label: 'New', count: orders.filter((o) => o.status === 'new').length },
-    { id: 'progress', label: 'In Progress', count: orders.filter((o) => o.status === 'progress').length },
-    { id: 'completed', label: 'Completed', count: orders.filter((o) => o.status === 'completed').length },
-  ];
-
-  const filteredOrders = orders.filter((order) => order.status === activeTab);
-  const handleStatusUpdate = (orderId, newStatus) => setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)));
-
   return (
     // --- 2. ADD 'relative' TO THE MAIN WRAPPER ---
-    <div className="min-h-screen pb-20 pt-20 relative">
+    <div className="min-h-screen pb-20 pt-32 relative">
 
       {/* --- 3. ADD THE CANVAS BACKGROUND WITH YOUR COLORS --- */}
       <CanvasBackground
@@ -40,34 +26,25 @@ const OrdersDashboardPage = () => {
             <p className="text-amber-700 font-semibold">Manage your incoming orders</p>
           </div>
 
-          {/* --- 6. TAB COLORS UPDATED FOR AMBER THEME --- */}
-          <div className="flex space-x-1 mb-8 bg-amber-100 p-1 rounded-lg">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-3 px-4 rounded-lg font-semibold font-medium transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-amber-500/90 text-white shadow-md' // Active tab
-                    : 'text-amber-700 hover:bg-amber-500/10' // Inactive tab
-                }`}
-              >
-                {tab.label} ({tab.count})
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-4">
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => <OrderCard key={order.id} order={order} onStatusUpdate={handleStatusUpdate} />)
-            ) : (
-              // --- 7. EMPTY STATE COLORS UPDATED ---
-              <div className="text-center py-12 bg-amber-50/50 rounded-lg">
-                <Package className="h-16 w-16 text-amber-600 mx-auto mb-4" />
-                <h3 className="text-xl font-serif font-bold mb-2 text-amber-900">No orders in this category</h3>
-                <p className="text-amber-700">Orders will appear here when customers place them</p>
+          {/* Coming Soon Section */}
+          <div className="text-center py-20 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl shadow-lg border border-amber-200/50">
+            <div className="mb-6">
+              <Clock className="h-20 w-20 text-amber-600 mx-auto mb-4" />
+              <Sparkles className="h-8 w-8 text-amber-500 mx-auto animate-pulse" />
+            </div>
+            <h2 className="text-4xl font-serif font-bold mb-4 text-amber-900">Coming Soon</h2>
+            <h3 className="text-2xl font-semibold mb-6 text-amber-800">Future Scope: Under Development</h3>
+            <p className="text-lg text-amber-700 max-w-2xl mx-auto leading-relaxed">
+              We're working hard to bring you a comprehensive order management system.
+              This feature will allow you to track orders, manage deliveries, and communicate
+              directly with your customers. Stay tuned for updates!
+            </p>
+            <div className="mt-8">
+              <div className="inline-flex items-center gap-2 bg-amber-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg">
+                <Clock className="h-5 w-5" />
+                In Development
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import BackgroundScribbles from './components/BackgroundScribbles';
 import EpicGradientBackground from './components/EpicGradientBackground';
 import CustomCursor from './components/CustomCursor';
+import Header from './components/Header';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -43,6 +44,7 @@ const AppShell = () => {
             path="/upload"
             element={
               <ProtectedRoute>
+                <Header />
                 <UploadProductPage />
               </ProtectedRoute>
             }
@@ -51,6 +53,7 @@ const AppShell = () => {
             path="/manage-products"
             element={
               <ProtectedRoute>
+                <Header />
                 <ManageProductsPage />
               </ProtectedRoute>
             }
@@ -59,6 +62,7 @@ const AppShell = () => {
             path="/orders"
             element={
               <ProtectedRoute>
+                <Header />
                 <OrdersDashboardPage />
               </ProtectedRoute>
             }
@@ -67,6 +71,7 @@ const AppShell = () => {
             path="/analytics"
             element={
               <ProtectedRoute>
+                <Header />
                 <AnalyticsDashboardPage />
               </ProtectedRoute>
             }
@@ -75,6 +80,7 @@ const AppShell = () => {
             path="/profile-artisan"
             element={
               <ProtectedRoute>
+                <Header />
                 <ProfilePageArtisan />
               </ProtectedRoute>
             }
@@ -85,6 +91,7 @@ const AppShell = () => {
             path="/map"
             element={
               <ProtectedRoute>
+                <Header />
                 <MapPage />
               </ProtectedRoute>
             }
@@ -93,6 +100,7 @@ const AppShell = () => {
             path="/explore"
             element={
               <ProtectedRoute>
+                <Header />
                 <ExplorePage />
               </ProtectedRoute>
             }
@@ -101,6 +109,7 @@ const AppShell = () => {
             path="/cart"
             element={
               <ProtectedRoute>
+                <Header />
                 <CartPage />
               </ProtectedRoute>
             }
@@ -111,6 +120,7 @@ const AppShell = () => {
             path="/profile"
             element={
               <ProtectedRoute>
+                <Header />
                 <ProfilePageBuyer />
               </ProtectedRoute>
             }
@@ -119,6 +129,7 @@ const AppShell = () => {
             path="/artisan/profile"
             element={
               <ProtectedRoute>
+                <Header />
                 <ProfilePageArtisan />
               </ProtectedRoute>
             }

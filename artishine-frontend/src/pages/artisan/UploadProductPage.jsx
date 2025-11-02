@@ -33,6 +33,7 @@ const UploadProductPage = () => {
   // --- ADDED ---
   // New state to manage the final publish button's loading
   const [isPublishing, setIsPublishing] = useState(false);
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -115,7 +116,7 @@ const UploadProductPage = () => {
 
   // --- RENDER ---
   return (
-    <div className="min-h-screen pb-20 pt-20 relative">
+    <div className="min-h-screen pb-20 pt-32 relative">
       <CanvasBackground backgroundColor="#f9feffff" elementColors={["#ff620062", "#005cdc5a"]} />
       <ToastContainer />
 
@@ -141,6 +142,21 @@ const UploadProductPage = () => {
         {step === 2 && (
           <div className="space-y-6">
             <h2 className="text-2xl font-serif font-bold text-amber-900">Step 2: Record Story</h2>
+
+            {/* Recording Tips */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <h3 className="font-semibold text-amber-900 mb-3">💡 Recording Tips</h3>
+              <p className="text-amber-800 font-bold mb-3">Please talk for 8 seconds or more</p>
+              <ul className="text-amber-800 space-y-2 text-sm">
+                <li>• What inspired you to create this product?</li>
+                <li>• What materials did you use and why?</li>
+                <li>• How did you make it? Share your process</li>
+                <li>• Who is this product for?</li>
+                <li>• What makes your craft special or unique?</li>
+                <li>• Any cultural or traditional significance?</li>
+              </ul>
+            </div>
+
             <div className="flex flex-col items-center space-y-4">
               <button
                 onClick={isRecording ? stopRecording : startRecording}
@@ -273,7 +289,7 @@ const UploadProductPage = () => {
             <PrimaryButton
               onClick={async () => {
                 setIsPublishing(true); // Start loading
-                
+
                 try {
                   if (postToInstagram) {
                     toast.info("Posting to Instagram...");
@@ -281,13 +297,13 @@ const UploadProductPage = () => {
                     await api.post(
                       `/products/${generated.user_id}/${generated.product_id}/post-to-instagram`
                     );
-                    toast.success("Product published and posted to Instagram!");
+                    // Show success screen - user will choose next action
+                    setShowSuccessScreen(true);
                   } else {
                     toast.success("Product published to your shop!");
+                    // Navigate away on success
+                    setTimeout(() => navigate("/manage-products"), 1500);
                   }
-
-                  // Navigate away on success
-                  setTimeout(() => navigate("/manage-products"), 1500);
 
                 } catch (err) {
                   console.error(err);
@@ -303,14 +319,70 @@ const UploadProductPage = () => {
               ) : (
                 <Sparkles className="h-6 w-6" />
               )}
-              disabled={isPublishing}
+              disabled={isPublishing || showSuccessScreen}
             >
               {isPublishing ? "Publishing..." : "Publish Product"}
             </PrimaryButton>
           </div>
         )}
-      </div>
 
+        {/* Success Screen for Instagram Post */}
+        {showSuccessScreen && (
+          <div className="fixed inset-0 bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center z-50">
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl border border-amber-200">
+              <div className="mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <Instagram className="h-10 w-10 text-white" />
+                </div>
+                <h2 className="text-3xl font-serif font-bold text-amber-900 mb-2">🎉 Success!</h2>
+                <p className="text-lg text-amber-800 font-medium mb-4">
+                  Your marvelous product was posted on our Instagram page!
+                </p>
+                <a
+                  href="https://www.instagram.com/artishine_pixelite/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-amber-700 hover:text-amber-900 font-medium underline mb-4"
+                >
+                  View it here →
+                </a>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-col space-y-3">
+                  <PrimaryButton
+                    onClick={() => {
+                      setShowSuccessScreen(false);
+                      navigate("/upload");
+                    }}
+                    className="w-full"
+                    size="lg"
+                  >
+                    Upload More Products
+                  </PrimaryButton>
+
+                  <PrimaryButton
+                    onClick={() => {
+                      setShowSuccessScreen(false);
+                      navigate("/manage-products");
+                    }}
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                  >
+                    View Products
+                  </PrimaryButton>
+                </div>
+
+                <p className="text-amber-700 font-medium">
+                  Thank you for choosing Artishine! 🌟
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
       <Navigation userRole="artisan" />
     </div>
   );

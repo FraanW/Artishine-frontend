@@ -160,7 +160,7 @@ const MapPage = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20 pt-20 relative">
+    <div className="min-h-screen pb-20 pt-32 relative">
       {/* Canvas Background */}
       <CanvasBackground
         backgroundColor="#f9feffff"

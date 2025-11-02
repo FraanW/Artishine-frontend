@@ -199,7 +199,7 @@ const ManageProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20 pt-20 relative">
+    <div className="min-h-screen pb-20 pt-32 relative">
       <CanvasBackground
         backgroundColor="#f9feffff"
         elementColors={["#ff620062", "#005cdc5a"]}
@@ -287,7 +287,7 @@ const ManageProductsPage = () => {
                             {product.story?.Category || "—"}
                           </span>
                           <div className="flex space-x-1">
-                            {/* Edit */}
+                            {/* Edit
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -297,7 +297,7 @@ const ManageProductsPage = () => {
                               className="p-1 text-amber-700 hover:bg-amber-100 rounded"
                             >
                               <Edit3 className="h-4 w-4" />
-                            </button>
+                            </button> */}
                             {/* Delete */}
                             <button
                               onClick={(e) => {

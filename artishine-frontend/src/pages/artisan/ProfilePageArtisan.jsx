@@ -4,6 +4,7 @@ import Navigation from '../../components/Navigation';
 import CanvasBackground from '../../components/CanvasBackground';
 import UserService from '../../services/UserServices';
 import { Instagram, Sparkles, User, Loader2, Upload, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const ProfilePageArtisan = () => {
   const [profile, setProfile] = useState(null);
@@ -27,12 +28,17 @@ const ProfilePageArtisan = () => {
           shopName: data.shop_name || '',
           location: data.place || '',
           bio: data.bio || '',
+          phone: data.phone_number || '',
+          typeOfWork: data.type_of_work || '',
           photo_url: data.photo_url || null,
           instagramHandle: data.instagram_handle || null,
         });
       } catch (err) {
         console.error("Failed to load profile:", err);
-        alert("Could not load your profile. Please try again.");
+        toast.error("Could not load your profile. Please try again.", {
+          position: 'top-center',
+          autoClose: 3000
+        });
       } finally {
         setLoading(false);
       }
@@ -48,11 +54,17 @@ const ProfilePageArtisan = () => {
 
     // Validate file
     if (!file.type.startsWith('image/')) {
-      alert("Please select a valid image");
+      toast.error("Please select a valid image file", {
+        position: 'top-center',
+        autoClose: 3000
+      });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image must be under 5MB");
+      toast.error("Image must be under 5MB", {
+        position: 'top-center',
+        autoClose: 3000
+      });
       return;
     }
 
@@ -69,12 +81,22 @@ const ProfilePageArtisan = () => {
     try {
       const res = await UserService.uploadPhoto(photoFile);
       setProfile((p) => ({ ...p, photo_url: res.data.photo_url }));  // FIXED: Use res.data.photo_url
-      alert(res.data.message || "Photo uploaded!");  // Use backend message
+      toast.success(res.data.message || "Photo uploaded successfully!", {
+        position: 'top-center',
+        autoClose: 3000
+      });
+      // Clear the photo selection after successful upload
       setPhotoFile(null);
       setPhotoPreview(null);
+      // Reset the file input
+      const fileInput = document.getElementById('photo-input');
+      if (fileInput) fileInput.value = '';
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.detail || "Upload failed");
+      toast.error(err.response?.data?.detail || "Upload failed", {
+        position: 'top-center',
+        autoClose: 3000
+      });
     } finally {
       setUploading(false);
     }
@@ -90,12 +112,20 @@ const ProfilePageArtisan = () => {
         shopName: profile.shopName.trim() || undefined,
         location: profile.location.trim() || undefined,
         bio: profile.bio.trim() || undefined,
+        phone: profile.phone?.trim() || undefined,
+        typeOfWork: profile.typeOfWork?.trim() || undefined,
       };
       const res = await UserService.updateProfile(updateData);
-      alert(res.data.message || "Profile saved!");  // Use backend message
+      toast.success(res.data.message || "Profile saved successfully!", {
+        position: 'top-center',
+        autoClose: 3000
+      });
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.detail || "Save failed");
+      toast.error(err.response?.data?.detail || "Save failed", {
+        position: 'top-center',
+        autoClose: 3000
+      });
     } finally {
       setSaving(false);
     }
@@ -118,7 +148,9 @@ const ProfilePageArtisan = () => {
   const cancelPhoto = () => {
     setPhotoFile(null);
     setPhotoPreview(null);
-    document.getElementById('photo-input').value = '';
+    // Reset the file input
+    const fileInput = document.getElementById('photo-input');
+    if (fileInput) fileInput.value = '';
   };
 
   if (loading) {
@@ -130,7 +162,7 @@ const ProfilePageArtisan = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20 md:pb-6 pt-20 relative overflow-hidden">
+    <div className="min-h-screen pb-20 md:pb-6 pt-32 relative overflow-hidden">
       <CanvasBackground
         backgroundColor="#f9feffff"
         elementColors={['#ff620062', '#005cdc5a']}
@@ -178,12 +210,14 @@ const ProfilePageArtisan = () => {
                 onChange={handlePhotoChange}
                 className="hidden"
               />
-              <label htmlFor="photo-input">
-                <PrimaryButton variant="outline" size="sm" as="span">
-                  <Upload className="h-4 w-4 mr-1" />
-                  Choose Photo
-                </PrimaryButton>
-              </label>
+              <PrimaryButton
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('photo-input').click()}
+              >
+                <Upload className="h-4 w-4 mr-1" />
+                Choose Photo
+              </PrimaryButton>
 
               {photoFile && (
                 <>
@@ -194,7 +228,10 @@ const ProfilePageArtisan = () => {
                     className="flex items-center"
                   >
                     {uploading ? (
-                      <>Uploading...</>
+                      <>
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        Uploading...
+                      </>
                     ) : (
                       <>Upload Photo</>
                     )}
@@ -254,12 +291,42 @@ const ProfilePageArtisan = () => {
               />
             </div>
 
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-amber-900">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={profile?.phone || ''}
+                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg border border-amber-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                placeholder="+91 9876543210"
+              />
+            </div>
+
+            {/* Type of Work */}
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-amber-900">
+                Type of Work
+              </label>
+              <input
+                type="text"
+                value={profile?.typeOfWork || ''}
+                onChange={(e) => setProfile({ ...profile, typeOfWork: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg border border-amber-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                placeholder="e.g. Pottery, Textiles, Jewelry"
+              />
+            </div>
+
             {/* Bio */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-semibold text-amber-900">
                   About My Craft
                 </label>
+                {/* Generate Bio button hidden */}
+                {/*
                 <PrimaryButton
                   onClick={handleGenerateBio}
                   disabled={generating}
@@ -270,6 +337,7 @@ const ProfilePageArtisan = () => {
                   <Sparkles className="h-4 w-4" />
                   {generating ? 'Generating...' : 'Generate Bio'}
                 </PrimaryButton>
+                */}
               </div>
               <textarea
                 value={profile?.bio || ''}
@@ -300,6 +368,12 @@ const ProfilePageArtisan = () => {
               <PrimaryButton
                 variant={profile?.instagramHandle ? 'wood' : 'terracotta'}
                 size="sm"
+                onClick={() => {
+                  toast.info("Instagram integration is coming soon! This feature will allow you to connect your account and auto-post your products.", {
+                    position: 'top-center',
+                    autoClose: 4000
+                  });
+                }}
               >
                 {profile?.instagramHandle ? 'Disconnect' : 'Connect'}
               </PrimaryButton>

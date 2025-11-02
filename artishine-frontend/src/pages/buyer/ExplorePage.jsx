@@ -279,7 +279,7 @@ const ExplorePage = () => {
 
   return (
     // --- 2. ADD 'relative' TO THE MAIN WRAPPER ---
-    <div className="min-h-screen pb-20 pt-20 relative">
+    <div className="min-h-screen pb-20 pt-32 relative">
 
       {/* --- 3. ADD THE CANVAS BACKGROUND WITH YOUR COLORS --- */}
       <CanvasBackground
