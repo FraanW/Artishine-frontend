@@ -353,7 +353,7 @@ const UploadProductPage = () => {
                   <PrimaryButton
                     onClick={() => {
                       setShowSuccessScreen(false);
-                      navigate("/upload");
+                      window.location.href = "/upload";
                     }}
                     className="w-full"
                     size="lg"
